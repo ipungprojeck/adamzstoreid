@@ -527,7 +527,7 @@ function rupiah(n){ return 'Rp' + Number(n||0).toLocaleString('id-ID'); }
 function genOrderCode(){
   const t = Date.now().toString().slice(-6);
   const r = Math.floor(100+Math.random()*900);
-  return 'ADMZ-' + t + '-' + r;
+  return '' + t + '-' + r;
 }
 function showToast(msg){
   state.toast = msg;
@@ -535,7 +535,7 @@ function showToast(msg){
   setTimeout(()=>{ state.toast=''; render(); }, 3200);
 }
 function waLink(text){
-  return 'https://wa.me/' + state.config.whatsapp + '?text=' + encodeURIComponent(text);
+  return 'https://wa.me/6282135994381' + state.config.whatsapp + '?text=' + encodeURIComponent(text);
 }
 function mediaInner(image){
   if(image) return `<img src="${image}" alt="">`;
@@ -845,12 +845,12 @@ function renderPayment(){
 
       <div class="wa-note">
          ${proof
-          ? 'Tekan tombol di bawah untuk mengirim foto bukti dan rincian pesanan ke WhatsApp admin. Di HP, akan muncul menu bagikan — pilih WhatsApp. Kalau menu itu tidak muncul (biasanya di laptop), WhatsApp akan terbuka dengan teks pesanan saja — lampirkan foto secara manual di sana, atau pakai tombol "Unduh foto" di atas dulu.'
-          : 'Setelah transfer, unggah foto bukti di atas lalu tekan tombol di bawah supaya foto dan rincian pesanan sama-sama sampai ke admin. Boleh juga dilewati dan kirim teks pesanan saja.'}
+          ? 'Tekan tombol di bawah untuk mengirim foto bukti dan rincian pesanan ke WhatsApp admin. Akan muncul menu bagikan — pilih WhatsApp.'
+          : 'Setelah transfer, unggah foto bukti di atas lalu tekan tombol di bawah supaya foto dan rincian pesanan sampai ke admin.'}
       </div>
 
       <button class="btn-primary" id="btn-send-wa">
-        ${proof ? 'Kirim Bukti & Pesanan via WhatsApp' : 'Saya Sudah Bayar — Lanjutkan ke WhatsApp'}
+        ${proof ? 'Kirim Bukti & Pesanan via WhatsApp' : 'Lanjutkan ke WhatsApp'}
       </button>
     </div>
   `;
@@ -941,7 +941,7 @@ function bindProductDetailEvents(){
 }
 
 /* ============================= ADMIN ============================= */
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_PASSWORD = 'ipungcuy123';
 
 function openAdmin(){
   state.admin.open = true;
