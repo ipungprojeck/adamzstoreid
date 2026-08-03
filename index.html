@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADAMZ STORE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1120;
+    --bg-elevated:#171B2E;
+    --bg-elevated-2:#1D2238;
+    --flame-1:#FF6A3D;
+    --flame-2:#D6274B;
+    --cyan:#43CFEA;
+    --gold:#FFC94D;
+    --text:#F3F4F8;
+    --text-dim:#98A0B8;
+    --text-faint:#666E8A;
+    --border:rgba(255,255,255,0.09);
+    --border-strong:rgba(255,255,255,0.16);
+    --success:#4ADE80;
+    --danger:#FF5C6C;
+    --radius-lg:18px;
+    --radius-md:12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(255,106,61,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(67,207,234,0.10), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Plus Jakarta Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Rajdhani', sans-serif;
+    font-weight:700;
+    letter-spacing:0.01em;
+    margin:0;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  a{ color:inherit; }
+  button{ font-family:inherit; cursor:pointer; }
+  #app{ max-width:1080px; margin:0 auto; padding:0 20px 80px; }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 0 18px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand__mark{
+    width:42px; height:42px; border-radius:11px;
+    background:linear-gradient(135deg, var(--flame-1), var(--flame-2));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; color:#fff;
+    box-shadow:0 4px 14px rgba(214,39,75,0.35);
+    overflow:hidden; flex-shrink:0;
+  }
+  .brand__mark img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .brand__name{ font-size:20px; letter-spacing:0.03em; }
+  .brand__name span{ color:var(--flame-1); }
+  .admin-entry{
+    background:transparent; border:1px solid var(--border);
+    color:var(--text-dim); font-size:12.5px; padding:8px 14px;
+    border-radius:100px; transition:all .15s;
+  }
+  .admin-entry:hover{ border-color:var(--border-strong); color:var(--text); }
+
+  /* ---------- Hero ---------- */
+  .hero{ padding:18px 0 30px; }
+  .hero__eyebrow{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12px; color:var(--cyan); text-transform:uppercase;
+    letter-spacing:0.14em; font-weight:600; margin-bottom:12px;
+  }
+  .hero__eyebrow::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan); }
+  .hero h1{ font-size:clamp(30px, 5vw, 44px); line-height:1.05; margin-bottom:12px; }
+  .hero h1 .flame{
+    background:linear-gradient(90deg, var(--flame-1), var(--gold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p{ color:var(--text-dim); font-size:15.5px; max-width:520px; line-height:1.6; }
+
+  /* ---------- Tabs ---------- */
+  .tabs{ display:flex; gap:8px; margin:26px 0 20px; border-bottom:1px solid var(--border); }
+  .tab{
+    background:none; border:none; color:var(--text-faint);
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px;
+    letter-spacing:0.02em; padding:10px 4px 14px; position:relative;
+    margin-right:22px;
+  }
+  .tab.active{ color:var(--text); }
+  .tab.active::after{
+    content:''; position:absolute; left:0; right:0; bottom:-1px; height:3px;
+    border-radius:3px 3px 0 0;
+    background:linear-gradient(90deg, var(--flame-1), var(--gold));
+  }
+  .tab__count{ color:var(--text-faint); font-family:'Plus Jakarta Sans'; font-weight:600; font-size:12px; }
+
+  /* ---------- Grid & Ticket cards ---------- */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(215px,1fr)); gap:16px; margin-top:6px; }
+
+  .ticket{
+    position:relative;
+    background:linear-gradient(165deg, var(--bg-elevated), var(--bg-elevated-2));
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:18px 18px 16px;
+    display:flex; flex-direction:column; gap:12px;
+    transition:transform .15s, border-color .15s;
+  }
+  .ticket:hover{ transform:translateY(-3px); border-color:var(--border-strong); }
+  .ticket__badge{
+    position:absolute; top:14px; right:14px;
+    font-size:10.5px; font-weight:700; letter-spacing:0.05em;
+    color:var(--bg); background:var(--gold); padding:3px 8px; border-radius:100px;
+  }
+  .ticket__icon{
+    width:44px; height:44px; border-radius:11px;
+    display:flex; align-items:center; justify-content:center; font-size:21px;
+    background:linear-gradient(135deg, rgba(255,106,61,0.18), rgba(67,207,234,0.14));
+    border:1px solid var(--border);
+  }
+  .ticket__media{
+    width:100%; aspect-ratio:3/4; border-radius:12px; overflow:hidden;
+    background:linear-gradient(135deg, rgba(255,106,61,0.12), rgba(67,207,234,0.10));
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ticket__media img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ticket__media-empty{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    color:var(--text-faint); font-size:11px; text-align:center; padding:10px;
+  }
+  .ticket__media-empty svg{ width:26px; height:26px; opacity:0.5; }
+  .ticket--clickable{ cursor:pointer; }
+  .ticket__title{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:19px; }
+  .ticket__sub{ color:var(--text-faint); font-size:12.5px; }
+  .ticket__perf{
+    position:relative;
+    border-top:2px dashed var(--border-strong);
+    margin:2px -18px 0;
+  }
+  .ticket__perf::before, .ticket__perf::after{
+    content:''; position:absolute; top:-9px; width:18px; height:18px; border-radius:50%;
+    background:var(--bg);
+  }
+  .ticket__perf::before{ left:-9px; }
+  .ticket__perf::after{ right:-9px; }
+  .ticket__bottom{ display:flex; align-items:center; justify-content:space-between; padding-top:10px; }
+  .ticket__price{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:19px; color:var(--gold); }
+  .ticket__buy{
+    background:linear-gradient(90deg, var(--flame-1), var(--flame-2));
+    border:none; color:#fff; font-weight:700; font-size:13px;
+    padding:9px 16px; border-radius:10px; letter-spacing:0.02em;
+    box-shadow:0 6px 16px rgba(214,39,75,0.25);
+  }
+  .ticket__buy:hover{ filter:brightness(1.08); }
+  .ticket__desc{ color:var(--text-dim); font-size:13px; line-height:1.5; }
+
+  .empty-state{
+    border:1px dashed var(--border-strong); border-radius:var(--radius-lg);
+    padding:40px 20px; text-align:center; color:var(--text-faint); font-size:14px;
+  }
+
+  /* ---------- Checkout / Payment panel ---------- */
+  .panel{
+    background:var(--bg-elevated); border:1px solid var(--border);
+    border-radius:var(--radius-lg); padding:26px; max-width:520px; margin:10px auto 0;
+  }
+  .panel__back{ background:none; border:none; color:var(--text-faint); font-size:13px; margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+  .panel__back:hover{ color:var(--text); }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12.5px; color:var(--text-dim); margin-bottom:6px; font-weight:600; }
+  .field input, .field textarea, .field select{
+    width:100%; background:var(--bg); border:1px solid var(--border);
+    border-radius:10px; padding:11px 13px; color:var(--text); font-size:14px; font-family:inherit;
+  }
+  .field input:focus, .field textarea:focus{ outline:none; border-color:var(--cyan); }
+  .field__hint{ font-size:11.5px; color:var(--text-faint); margin-top:5px; }
+  .summary-row{ display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; color:var(--text-dim); }
+  .summary-row.total{ color:var(--text); font-weight:700; font-size:16px; border-top:1px solid var(--border); margin-top:6px; padding-top:12px; }
+  .summary-row.total .amt{ color:var(--gold); }
+  .btn-primary{
+    width:100%; background:linear-gradient(90deg, var(--flame-1), var(--flame-2));
+    border:none; color:#fff; font-weight:700; font-size:14.5px; padding:14px;
+    border-radius:12px; margin-top:6px; box-shadow:0 8px 20px rgba(214,39,75,0.28);
+  }
+  .btn-primary:hover{ filter:brightness(1.06); }
+  .btn-primary:disabled{ opacity:0.45; cursor:not-allowed; filter:none; }
+  .btn-secondary{
+    width:100%; background:transparent; border:1px solid var(--border-strong);
+    color:var(--text); font-weight:600; font-size:14px; padding:12px; border-radius:12px;
+  }
+  .error-text{ color:var(--danger); font-size:12.5px; margin-top:6px; }
+
+  /* Boarding-pass order summary at payment */
+  .boarding{
+    background:var(--bg); border:1px solid var(--border); border-radius:14px;
+    padding:16px 18px; margin-bottom:18px;
+  }
+  .boarding__row{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
+  .boarding__label{ font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.08em; }
+  .boarding__val{ font-size:13.5px; font-weight:600; }
+  .boarding__code{ color:var(--cyan); }
+
+  .qris-box{
+    background:#fff; border-radius:14px; padding:18px; display:flex; flex-direction:column;
+    align-items:center; gap:10px; margin-bottom:18px;
+  }
+  .qris-box img{ width:100%; max-width:230px; border-radius:6px; }
+  .qris-placeholder{
+    width:100%; max-width:230px; aspect-ratio:1; border-radius:6px;
+    background:
+      repeating-linear-gradient(0deg, #111 0 8px, #fff 8px 16px),
+      repeating-linear-gradient(90deg, #111 0 8px, #fff 8px 16px);
+    background-blend-mode:multiply; opacity:0.85;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    color:#111; font-size:11.5px; font-weight:700; padding:14px;
+  }
+  .qris-caption{ color:#333; font-size:12px; font-weight:600; }
+
+  .wa-note{
+    display:flex; gap:10px; align-items:flex-start; background:rgba(67,207,234,0.08);
+    border:1px solid rgba(67,207,234,0.22); border-radius:12px; padding:12px 14px; margin-bottom:16px;
+    font-size:12.5px; color:var(--text-dim); line-height:1.5;
+  }
+
+  .proof-box{
+    border:1px dashed var(--border-strong); border-radius:12px; padding:14px; margin-bottom:16px;
+  }
+  .proof-box__label{ font-size:12.5px; font-weight:600; color:var(--text-dim); margin-bottom:8px; display:block; }
+  .proof-empty{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    border-radius:10px; padding:16px; color:var(--text-faint); font-size:13px; cursor:pointer;
+    background:var(--bg);
+  }
+  .proof-empty:hover{ color:var(--text); }
+  .proof-preview{ display:flex; align-items:center; gap:12px; }
+  .proof-preview img{ width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--border); }
+  .proof-preview__info{ flex:1; font-size:12.5px; color:var(--text-dim); }
+  .proof-preview__actions{ display:flex; gap:8px; margin-top:6px; }
+  .proof-preview__actions a, .proof-preview__actions button{
+    font-size:11.5px; color:var(--cyan); background:none; border:none; padding:0; text-decoration:underline;
+  }
+  .proof-preview__actions .danger-link{ color:var(--danger); }
+
+  /* ---------- Footer ---------- */
+  .footer{
+    margin-top:60px; border-top:1px solid var(--border); padding-top:22px;
+    display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between;
+  }
+  .footer__cs{ display:flex; align-items:center; gap:10px; }
+  .footer__cs-icon{
+    width:38px; height:38px; border-radius:10px; background:rgba(74,222,128,0.14);
+    border:1px solid rgba(74,222,128,0.3); display:flex; align-items:center; justify-content:center; font-size:17px;
+  }
+  .footer__cs-text b{ display:block; font-size:13.5px; }
+  .footer__cs-text span{ font-size:12px; color:var(--text-faint); }
+  .footer__cs-link{
+    text-decoration:none; background:rgba(74,222,128,0.12); color:var(--success);
+    border:1px solid rgba(74,222,128,0.3); font-weight:700; font-size:12.5px;
+    padding:9px 15px; border-radius:100px;
+  }
+  .footer small{ display:block; color:var(--text-faint); font-size:11.5px; margin-top:18px; }
+
+  /* ---------- Modal (admin) ---------- */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(6,7,14,0.72); backdrop-filter:blur(3px);
+    display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:50; overflow-y:auto;
+  }
+  .modal{
+    background:var(--bg-elevated); border:1px solid var(--border-strong); border-radius:var(--radius-lg);
+    padding:26px; max-width:640px; width:100%; margin-bottom:40px;
+  }
+  .modal__head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .modal__close{ background:none; border:none; color:var(--text-faint); font-size:22px; line-height:1; }
+  .modal__close:hover{ color:var(--text); }
+  .admin-tabs{ display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+  .admin-tab{
+    background:var(--bg); border:1px solid var(--border); color:var(--text-dim);
+    font-size:12.5px; font-weight:600; padding:8px 13px; border-radius:100px;
+  }
+  .admin-tab.active{ background:var(--flame-1); border-color:var(--flame-1); color:#fff; }
+  .admin-grid-item{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px;
+  }
+  .admin-grid-item .field{ margin-bottom:0; }
+  .admin-grid-item .field label{ font-size:10.5px; }
+  .product-row{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:8px;
+  }
+  .product-row__info b{ display:block; font-size:13.5px; }
+  .product-row__info span{ font-size:12px; color:var(--text-faint); }
+  .icon-btn{
+    background:var(--bg-elevated-2); border:1px solid var(--border); color:var(--text-dim);
+    width:30px; height:30px; border-radius:8px; font-size:14px;
+  }
+  .icon-btn.danger:hover{ color:var(--danger); border-color:var(--danger); }
+  .icon-btn:hover{ color:var(--text); }
+  .save-bar{ display:flex; gap:10px; margin-top:18px; }
+  .save-bar .btn-primary{ margin-top:0; }
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--success); color:#0E1120; font-weight:700; font-size:13px;
+    padding:11px 20px; border-radius:100px; z-index:100; box-shadow:0 8px 20px rgba(0,0,0,0.3);
+  }
+  .qris-upload-preview{ width:120px; border-radius:8px; border:1px solid var(--border); margin-top:8px; }
+  .item-thumb{
+    width:56px; height:56px; border-radius:10px; overflow:hidden; flex-shrink:0;
+    background:var(--bg-elevated-2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .item-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .item-thumb-empty{ font-size:10px; color:var(--text-faint); text-align:center; padding:2px; }
+  .thumb-row{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .thumb-row .field{ margin-bottom:0; flex:1; }
+
+  /* Admin multi-image gallery editor */
+  .gallery-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .gallery-thumb{ position:relative; width:64px; height:64px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+  .gallery-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .gallery-thumb__remove{
+    position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%;
+    background:rgba(0,0,0,0.65); color:#fff; border:none; font-size:12px; line-height:1;
+  }
+  .gallery-add{
+    width:64px; height:64px; border-radius:8px; border:1px dashed var(--border-strong);
+    display:flex; align-items:center; justify-content:center; color:var(--text-faint);
+    font-size:24px; cursor:pointer; flex-shrink:0;
+  }
+  .gallery-add:hover{ color:var(--text); border-color:var(--text-dim); }
+  .gallery-hint{ font-size:11px; color:var(--text-faint); margin-top:6px; }
+
+  /* Product detail slider modal */
+  .pd-modal{ max-width:460px; padding:0; overflow:hidden; }
+  .pd-slider{ position:relative; width:100%; aspect-ratio:3/4; background:var(--bg); }
+  .pd-slide{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pd-slide-empty{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    color:var(--text-faint); font-size:13px; flex-direction:column; gap:8px;
+  }
+  .pd-nav{
+    position:absolute; top:50%; transform:translateY(-50%); width:34px; height:34px;
+    border-radius:50%; background:rgba(10,12,20,0.55); border:1px solid rgba(255,255,255,0.15);
+    color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center;
+  }
+  .pd-nav--prev{ left:10px; }
+  .pd-nav--next{ right:10px; }
+  .pd-dots{ position:absolute; bottom:12px; left:0; right:0; display:flex; justify-content:center; gap:6px; }
+  .pd-dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.35); }
+  .pd-dot.active{ background:#fff; width:16px; border-radius:4px; }
+  .pd-close{
+    position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%;
+    background:rgba(10,12,20,0.6); border:1px solid rgba(255,255,255,0.15); color:#fff; font-size:18px;
+    display:flex; align-items:center; justify-content:center; z-index:2;
+  }
+  .pd-body{ padding:22px; }
+  .pd-title{ font-size:22px; margin-bottom:6px; }
+  .pd-price{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:21px; color:var(--gold); margin-bottom:14px; }
+  .pd-desc{ color:var(--text-dim); font-size:14px; line-height:1.65; margin-bottom:18px; white-space:pre-line; }
+
+  @media(max-width:600px){
+    .admin-grid-item{ grid-template-columns:1fr; }
+    .topbar{ flex-wrap:wrap; gap:10px; }
+  }
+
+  @media(max-width:480px){
+    #app{ padding:0 12px 44px; }
+    .topbar{ padding:12px 0 10px; }
+    .brand{ gap:8px; }
+    .brand__mark{ width:32px; height:32px; font-size:12.5px; border-radius:9px; }
+    .brand__name{ font-size:15px; }
+    .admin-entry{ font-size:11px; padding:6px 11px; }
+
+    .hero{ padding:6px 0 16px; }
+    .hero__eyebrow{ font-size:10.5px; margin-bottom:8px; }
+    .hero h1{ font-size:22px; line-height:1.15; margin-bottom:8px; }
+    .hero p{ font-size:12.5px; line-height:1.5; }
+
+    .tabs{ margin:14px 0 12px; gap:4px; }
+    .tab{ font-size:13px; margin-right:14px; padding:8px 2px 10px; }
+    .tab__count{ font-size:10.5px; }
+
+    .grid{ grid-template-columns:repeat(2, 1fr); gap:9px; }
+    .ticket{ padding:11px 11px 10px; gap:8px; border-radius:14px; }
+    .ticket__icon{ width:34px; height:34px; font-size:16px; border-radius:9px; }
+    .ticket__badge{ top:9px; right:9px; font-size:9px; padding:2px 6px; }
+    .ticket__title{ font-size:13.5px; line-height:1.25; }
+    .ticket__sub{ font-size:10.5px; }
+    .ticket__desc{ font-size:11px; line-height:1.4; }
+    .ticket__perf{ margin:0 -11px 0; }
+    .ticket__bottom{ padding-top:6px; flex-wrap:wrap; gap:6px; }
+    .ticket__price{ font-size:14.5px; }
+    .ticket__buy{ font-size:11.5px; padding:7px 12px; border-radius:8px; }
+
+    .panel{ padding:14px; border-radius:14px; margin-top:4px; }
+    .panel h2{ font-size:17px !important; }
+    .field{ margin-bottom:12px; }
+    .field label{ font-size:11.5px; }
+    .field input, .field textarea, .field select{ padding:9px 11px; font-size:13px; }
+    .field__hint{ font-size:10.5px; }
+    .summary-row{ font-size:12px; padding:6px 0; }
+    .summary-row.total{ font-size:14px; }
+    .btn-primary{ font-size:13px; padding:12px; }
+    .btn-secondary{ font-size:12.5px; padding:10px; }
+
+    .boarding{ padding:12px 13px; border-radius:12px; }
+    .boarding__label{ font-size:9.5px; }
+    .boarding__val{ font-size:12px; }
+    .qris-box{ padding:14px; border-radius:12px; }
+    .qris-box img, .qris-placeholder{ max-width:170px; }
+    .qris-caption{ font-size:10.5px; }
+    .wa-note{ font-size:11px; padding:10px 12px; }
+    .proof-box{ padding:11px; }
+    .proof-preview img{ width:52px; height:52px; }
+
+    .modal{ padding:16px; border-radius:14px; }
+    .modal__head h2{ font-size:16px !important; }
+    .modal-backdrop{ padding:12px 8px; align-items:stretch; }
+    .admin-tabs{ gap:5px; }
+    .admin-tab{ font-size:10.5px; padding:6px 10px; }
+    .admin-grid-item{ padding:11px; gap:8px; }
+
+    .footer{ margin-top:36px; padding-top:16px; flex-direction:column; align-items:flex-start; gap:12px; }
+    .footer__cs-icon{ width:32px; height:32px; font-size:14px; }
+    .footer__cs-text b{ font-size:12px; }
+    .footer__cs-text span{ font-size:10.5px; }
+    .footer__cs-link{ align-self:stretch; text-align:center; font-size:11.5px; padding:8px 14px; }
+    .footer small{ font-size:10px; margin-top:12px; }
+
+    .pd-body{ padding:16px; }
+    .pd-title{ font-size:17px; }
+    .pd-price{ font-size:16px; margin-bottom:10px; }
+    .pd-desc{ font-size:12.5px; margin-bottom:14px; }
+  }
+
+  @media(max-width:360px){
+    .grid{ gap:7px; }
+    .ticket{ padding:9px 9px 8px; }
+    .ticket__title{ font-size:12.5px; }
+    .ticket__price{ font-size:13px; }
+    .ticket__buy{ font-size:10.5px; padding:6px 10px; }
+    .hero h1{ font-size:19px; }
+  }
+
+  @media(min-width:1000px){
+    .hero p{ font-size:16.5px; }
+    .grid{ grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+
+<script>
+/* ============================= DATA DEFAULTS ============================= */
+const DEFAULT_CONFIG = {
+  storeName: 'ADAMZ STORE',
+  whatsapp: '6282135994381',
+  qrisImage: '',
+  logoImage: 'data:image/jpeg;base64,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'
+};
+
+const DEFAULT_DIAMONDS = [
+  { id:'d1', amount:'25 Diamond',   bonus:'',        price:5000  },
+  { id:'d2', amount:'50 Diamond',   bonus:'',        price:9000  },
+  { id:'d3', amount:'70 Diamond',   bonus:'',        price:12000 },
+  { id:'d4', amount:'100 Diamond',  bonus:'+5 Bonus',price:16500 },
+  { id:'d5', amount:'140 Diamond',  bonus:'',        price:22500 },
+  { id:'d6', amount:'210 Diamond',  bonus:'+10 Bonus',price:33000 },
+  { id:'d7', amount:'355 Diamond',  bonus:'',        price:55000 },
+  { id:'d8', amount:'720 Diamond',  bonus:'+36 Bonus',price:108000},
+  { id:'d9', amount:'1450 Diamond', bonus:'+72 Bonus',price:215000},
+  { id:'d10',amount:'2180 Diamond', bonus:'+109 Bonus',price:320000}
+];
+
+const DEFAULT_PRODUCTS = [
+  { id:'p1', name:'Mobile Legends - 86 Diamond', price:22000, desc:'Top up diamond untuk akun Mobile Legends. Masuk otomatis ke akun setelah pembayaran dikonfirmasi.', images:[] },
+  { id:'p2', name:'PUBG Mobile - 60 UC',          price:15000, desc:'Top up UC untuk battle pass & skin di PUBG Mobile.',       images:[] },
+  { id:'p3', name:'Voucher Google Play Rp20.000', price:21000, desc:'Kode voucher untuk isi saldo Play Store.',  images:[] },
+  { id:'p4', name:'Higgs Domino - 300 Chip',      price:18000, desc:'Top up chip untuk Higgs Domino Island.',    images:[] }
+];
+
+/* ============================= STATE ============================= */
+let state = {
+  loading:true,
+  config: DEFAULT_CONFIG,
+  diamonds: DEFAULT_DIAMONDS,
+  products: DEFAULT_PRODUCTS,
+  tab: 'diamond',          // diamond | product
+  view: 'catalog',         // catalog | checkout | payment
+  selectedItem: null,      // {kind:'diamond'|'product', ...item}
+  form: { gameId:'', nickname:'', qty:1 },
+  orderCode: '',
+  admin: { open:false, authed:false, pwInput:'', tab:'store', editConfig:null, editDiamonds:null, editProducts:null, newProduct:null, editingProductIndex:null },
+  productDetail: null,     // { product, slide }
+  paymentProof: null,      // { file, previewUrl }
+  toast:''
+};
+
+function render(){ renderApp(); renderModal(); }
+
+/* ============================= STORAGE (Firebase Realtime Database) =============================
+   Cara aktifkan penyimpanan permanen:
+   1. Buat project gratis di https://console.firebase.google.com
+   2. Buka menu Build > Realtime Database > Create Database (pilih lokasi terdekat)
+   3. Pada tab "Rules", pakai:  { "rules": { ".read": true, ".write": true } }  lalu Publish
+      (catatan keamanan: siapa pun yang tahu URL database ini bisa membaca & mengubah data,
+       cukup aman untuk toko kecil tapi jangan simpan data sensitif di sini)
+   4. Salin URL yang muncul di atas tab Data, bentuknya seperti:
+      https://nama-project-default-rtdb.asia-southeast1.firebasedatabase.app
+   5. Tempel URL itu ke FIREBASE_DB_URL di bawah ini (ganti teks placeholder-nya)
+================================================================================================= */
+const FIREBASE_DB_URL = 'https://adamz-store-default-rtdb.asia-southeast1.firebasedatabase.app/config';
+
+function firebaseConfigured(){
+  return FIREBASE_DB_URL && !FIREBASE_DB_URL.includes('PASTE_URL_FIREBASE');
+}
+
+async function fbGet(path){
+  const res = await fetch(`${FIREBASE_DB_URL.replace(/\/$/,'')}/${path}.json`);
+  if(!res.ok) throw new Error('Gagal memuat data (' + res.status + ')');
+  return res.json();
+}
+async function fbPut(path, value){
+  const res = await fetch(`${FIREBASE_DB_URL.replace(/\/$/,'')}/${path}.json`, {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(value)
+  });
+  if(!res.ok) throw new Error('Gagal menyimpan (' + res.status + ')');
+  return res.json();
+}
+
+async function loadData(){
+  if(firebaseConfigured()){
+    try{
+      const cfg = await fbGet('config');
+      if(cfg) state.config = { ...DEFAULT_CONFIG, ...cfg };
+    }catch(e){ console.warn('Load config gagal:', e); }
+    try{
+      const dia = await fbGet('diamonds');
+      if(dia) state.diamonds = dia;
+    }catch(e){ console.warn('Load diamonds gagal:', e); }
+    try{
+      const prod = await fbGet('products');
+      if(prod) state.products = prod;
+    }catch(e){ console.warn('Load products gagal:', e); }
+  }
+  state.loading = false;
+  render();
+}
+async function saveConfig(cfg){
+  state.config = cfg;
+  if(!firebaseConfigured()) return { persisted:false };
+  await fbPut('config', cfg);
+  return { persisted:true };
+}
+async function saveDiamonds(list){
+  state.diamonds = list;
+  if(!firebaseConfigured()) return { persisted:false };
+  await fbPut('diamonds', list);
+  return { persisted:true };
+}
+async function saveProducts(list){
+  state.products = list;
+  if(!firebaseConfigured()) return { persisted:false };
+  await fbPut('products', list);
+  return { persisted:true };
+}
+
+/* ============================= HELPERS ============================= */
+function rupiah(n){ return 'Rp' + Number(n||0).toLocaleString('id-ID'); }
+function genOrderCode(){
+  const t = Date.now().toString().slice(-6);
+  const r = Math.floor(100+Math.random()*900);
+  return '' + t + '-' + r;
+}
+function showToast(msg){
+  state.toast = msg;
+  render();
+  setTimeout(()=>{ state.toast=''; render(); }, 3200);
+}
+function waLink(text){
+  return 'https://wa.me/' + state.config.whatsapp + '?text=' + encodeURIComponent(text);
+}
+function mediaInner(image){
+  if(image) return `<img src="${image}" alt="">`;
+  return `<div class="ticket__media-empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5.5-5.5L3 20"/></svg>
+    Belum ada gambar
+  </div>`;
+}
+function fileToCompressedDataUrl(file, maxWidth=800, quality=0.85){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > maxWidth){ h = Math.round(h * (maxWidth / w)); w = maxWidth; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = ()=> reject(new Error('Gagal membaca gambar'));
+      img.src = reader.result;
+    };
+    reader.onerror = ()=> reject(new Error('Gagal membaca file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ============================= ACTIONS ============================= */
+function clearPaymentProof(){
+  if(state.paymentProof && state.paymentProof.previewUrl){
+    URL.revokeObjectURL(state.paymentProof.previewUrl);
+  }
+  state.paymentProof = null;
+}
+function goCatalog(){ state.view='catalog'; state.selectedItem=null; clearPaymentProof(); render(); }
+function selectDiamond(item){
+  state.selectedItem = { kind:'diamond', ...item };
+  state.form = { gameId:'', nickname:'', qty:1 };
+  clearPaymentProof();
+  state.view='checkout'; render();
+}
+function selectProduct(item){
+  state.selectedItem = { kind:'product', ...item };
+  state.form = { gameId:'', nickname:'', qty:1 };
+  clearPaymentProof();
+  state.view='checkout'; render();
+}
+function openProductDetail(product){
+  if(!product) return;
+  state.productDetail = { product, slide:0 };
+  render();
+}
+function closeProductDetail(){
+  state.productDetail = null;
+  render();
+}
+function pdPrev(){
+  const total = (state.productDetail.product.images||[]).length || 1;
+  state.productDetail.slide = (state.productDetail.slide - 1 + total) % total;
+  render();
+}
+function pdNext(){
+  const total = (state.productDetail.product.images||[]).length || 1;
+  state.productDetail.slide = (state.productDetail.slide + 1) % total;
+  render();
+}
+function proceedToPayment(){
+  if(state.selectedItem.kind==='diamond' && !state.form.gameId.trim()){
+    showToast('ID Free Fire wajib diisi');
+    return;
+  }
+  state.orderCode = genOrderCode();
+  state.view='payment'; render();
+}
+function currentTotal(){
+  if(!state.selectedItem) return 0;
+  if(state.selectedItem.kind==='diamond') return state.selectedItem.price;
+  return state.selectedItem.price * (state.form.qty||1);
+}
+function buildWaMessage(){
+  const it = state.selectedItem;
+  const lines = [];
+  lines.push('Halo Admin ' + state.config.storeName + ', saya ingin konfirmasi pembayaran.');
+  lines.push('');
+  lines.push('Kode Pesanan: ' + state.orderCode);
+  if(it.kind==='diamond'){
+    lines.push('Item: ' + it.amount + (it.bonus? ' ('+it.bonus+')':''));
+    lines.push('ID Free Fire: ' + state.form.gameId);
+    if(state.form.nickname) lines.push('Nickname: ' + state.form.nickname);
+  }else{
+    lines.push('Item: ' + it.name);
+    lines.push('Jumlah: ' + state.form.qty);
+  }
+  lines.push('Total: ' + rupiah(currentTotal()));
+  lines.push('');
+  lines.push('Saya sudah melakukan pembayaran via QRIS. Mohon diproses ya, terima kasih!');
+  return lines.join('\n');
+}
+
+/* ============================= RENDER: MAIN APP ============================= */
+function renderApp(){
+  const el = document.getElementById('app');
+  if(state.loading){
+    el.innerHTML = `<div style="padding:80px 0;text-align:center;color:var(--text-faint);">Memuat toko...</div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand__mark">${state.config.logoImage ? `<img src="${state.config.logoImage}" alt="Logo">` : (state.config.storeName.trim().slice(0,2).toUpperCase())}</div>
+        <div class="brand__name">${state.config.storeName.split(' ')[0]} <span>${state.config.storeName.split(' ').slice(1).join(' ')}</span></div>
+      </div>
+      <button class="admin-entry" id="btn-admin">Admin</button>
+    </div>
+
+    ${state.view==='catalog' ? renderCatalog() : ''}
+    ${state.view==='checkout' ? renderCheckout() : ''}
+    ${state.view==='payment' ? renderPayment() : ''}
+
+    <div class="footer">
+      <div class="footer__cs">
+        <div class="footer__cs-icon">💬</div>
+        <div class="footer__cs-text">
+          <b>Butuh bantuan?</b>
+          <span>Customer service via WhatsApp</span>
+        </div>
+      </div>
+      <a class="footer__cs-link" href="${waLink('Halo Admin, saya ingin bertanya seputar top up.')}" target="_blank" rel="noopener">Chat CS</a>
+    </div>
+    <small>Transaksi diproses manual oleh admin setelah pembayaran dikonfirmasi via WhatsApp.</small>
+  `;
+
+  document.getElementById('btn-admin').onclick = ()=>{ openAdmin(); };
+  if(state.view==='catalog') bindCatalogEvents();
+  if(state.view==='checkout') bindCheckoutEvents();
+  if(state.view==='payment') bindPaymentEvents();
+}
+
+function renderCatalog(){
+  return `
+    <div class="hero">
+      <div class="hero__eyebrow">Proses instan · Manual verified</div>
+      <h1>Isi ulang <span class="flame">Diamond Free Fire</span><br>dan kebutuhan gaming lainnya.</h1>
+      <p>Pilih nominal, bayar lewat QRIS, lalu kirim bukti ke admin. Diamond masuk begitu pembayaran terverifikasi.</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab ${state.tab==='diamond'?'active':''}" data-tab="diamond">Top Up Diamond FF <span class="tab__count">(${state.diamonds.length})</span></button>
+      <button class="tab ${state.tab==='product'?'active':''}" data-tab="product">Produk Lainnya <span class="tab__count">(${state.products.length})</span></button>
+    </div>
+
+    ${state.tab==='diamond' ? renderDiamondGrid() : renderProductGrid()}
+  `;
+}
+
+function renderDiamondGrid(){
+  if(!state.diamonds.length) return `<div class="empty-state">Belum ada paket diamond. Tambahkan lewat panel admin.</div>`;
+  return `<div class="grid">${state.diamonds.map(d=>`
+    <div class="ticket" data-diamond="${d.id}">
+      ${d.bonus? `<div class="ticket__badge">${d.bonus}</div>`:''}
+      <div class="ticket__icon">💎</div>
+      <div>
+        <div class="ticket__title">${d.amount}</div>
+        <div class="ticket__sub">Free Fire · Masuk otomatis via ID</div>
+      </div>
+      <div class="ticket__perf"></div>
+      <div class="ticket__bottom">
+        <div class="ticket__price">${rupiah(d.price)}</div>
+        <button class="ticket__buy" data-diamond="${d.id}">Beli</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function renderProductGrid(){
+  if(!state.products.length) return `<div class="empty-state">Belum ada produk lain. Tambahkan lewat panel admin.</div>`;
+  return `<div class="grid">${state.products.map(p=>`
+    <div class="ticket ticket--clickable" data-product-card="${p.id}">
+      <div class="ticket__media">${mediaInner((p.images && p.images[0]) || '')}</div>
+      <div>
+        <div class="ticket__title">${p.name}</div>
+        <div class="ticket__desc">${p.desc||''}</div>
+      </div>
+      <div class="ticket__perf"></div>
+      <div class="ticket__bottom">
+        <div class="ticket__price">${rupiah(p.price)}</div>
+        <button class="ticket__buy" data-product="${p.id}">Beli</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function bindCatalogEvents(){
+  document.querySelectorAll('.tab').forEach(b=>{
+    b.onclick = ()=>{ state.tab = b.dataset.tab; render(); };
+  });
+  document.querySelectorAll('[data-diamond]').forEach(b=>{
+    b.onclick = ()=>{ selectDiamond(state.diamonds.find(d=>d.id===b.dataset.diamond)); };
+  });
+  document.querySelectorAll('[data-product-card]').forEach(card=>{
+    card.onclick = ()=>{ openProductDetail(state.products.find(p=>p.id===card.dataset.productCard)); };
+  });
+  document.querySelectorAll('[data-product]').forEach(b=>{
+    b.onclick = (e)=>{
+      e.stopPropagation();
+      selectProduct(state.products.find(p=>p.id===b.dataset.product));
+    };
+  });
+}
+
+function renderCheckout(){
+  const it = state.selectedItem;
+  const isDiamond = it.kind==='diamond';
+  return `
+    <div class="panel">
+      <button class="panel__back" id="back-catalog">← Kembali ke katalog</button>
+      <h2 style="font-size:22px;margin-bottom:4px;">${isDiamond ? it.amount : it.name}</h2>
+      <div style="color:var(--text-faint);font-size:13px;margin-bottom:18px;">${isDiamond ? 'Top up Diamond Free Fire' : (it.desc||'')}</div>
+
+      ${isDiamond ? `
+        <div class="field">
+          <label>ID Free Fire</label>
+          <input type="text" id="in-gameid" placeholder="Contoh: 123456789" value="${state.form.gameId}">
+          <div class="field__hint">Cek ID di halaman profil dalam game, di bawah nickname kamu.</div>
+        </div>
+        <div class="field">
+          <label>Nickname (opsional)</label>
+          <input type="text" id="in-nickname" placeholder="Untuk memastikan ID sudah benar" value="${state.form.nickname}">
+        </div>
+      ` : `
+        <div class="field">
+          <label>Jumlah</label>
+          <input type="number" min="1" id="in-qty" value="${state.form.qty}">
+        </div>
+      `}
+
+      <div class="summary-row"><span>${isDiamond ? it.amount : it.name}</span><span>${isDiamond ? rupiah(it.price) : rupiah(it.price)+' × '+state.form.qty}</span></div>
+      <div class="summary-row total"><span>Total</span><span class="amt">${rupiah(currentTotal())}</span></div>
+
+      <button class="btn-primary" id="btn-continue">Lanjut ke Pembayaran</button>
+    </div>
+  `;
+}
+
+function bindCheckoutEvents(){
+  document.getElementById('back-catalog').onclick = goCatalog;
+  const gid = document.getElementById('in-gameid');
+  const nick = document.getElementById('in-nickname');
+  const qty = document.getElementById('in-qty');
+  if(gid) gid.oninput = e=>{ state.form.gameId = e.target.value; };
+  if(nick) nick.oninput = e=>{ state.form.nickname = e.target.value; };
+  if(qty) qty.oninput = e=>{
+    state.form.qty = Math.max(1, parseInt(e.target.value)||1);
+    document.querySelector('.summary-row span:last-child') && render();
+  };
+  document.getElementById('btn-continue').onclick = proceedToPayment;
+}
+
+function renderPayment(){
+  const it = state.selectedItem;
+  const isDiamond = it.kind==='diamond';
+  const qrisImg = state.config.qrisImage
+    ? `<img src="${state.config.qrisImage}" alt="QRIS">`
+    : `<div class="qris-placeholder">Belum ada QRIS terpasang.<br>Admin dapat mengunggahnya di panel admin.</div>`;
+  const proof = state.paymentProof;
+
+  return `
+    <div class="panel">
+      <button class="panel__back" id="back-checkout">← Ubah pesanan</button>
+      <h2 style="font-size:22px;margin-bottom:16px;">Selesaikan Pembayaran</h2>
+
+      <div class="boarding">
+        <div class="boarding__row"><span class="boarding__label">Kode Pesanan</span><span class="boarding__val mono boarding__code">${state.orderCode}</span></div>
+        <div class="boarding__row"><span class="boarding__label">Item</span><span class="boarding__val">${isDiamond ? it.amount : it.name}</span></div>
+        ${isDiamond ? `<div class="boarding__row"><span class="boarding__label">ID Free Fire</span><span class="boarding__val mono">${state.form.gameId}</span></div>` : `<div class="boarding__row"><span class="boarding__label">Jumlah</span><span class="boarding__val">${state.form.qty}</span></div>`}
+        <div class="boarding__row"><span class="boarding__label">Total Bayar</span><span class="boarding__val" style="color:var(--gold);font-size:16px;">${rupiah(currentTotal())}</span></div>
+      </div>
+
+      <div class="qris-box">
+        ${qrisImg}
+        <div class="qris-caption">Scan dengan aplikasi e-wallet atau m-banking mana pun</div>
+      </div>
+
+      <div class="proof-box">
+        <label class="proof-box__label">Bukti Transfer (opsional, tapi disarankan)</label>
+        ${proof ? `
+          <div class="proof-preview">
+            <img src="${proof.previewUrl}" alt="Bukti transfer">
+            <div class="proof-preview__info">
+              ${proof.file.name}
+              <div class="proof-preview__actions">
+                <a href="${proof.previewUrl}" download="bukti-${state.orderCode}.jpg">Unduh foto</a>
+                <button class="danger-link" id="proof-remove">Hapus</button>
+              </div>
+            </div>
+          </div>
+        ` : `
+          <label class="proof-empty">
+            📎 Ketuk untuk unggah foto bukti transfer
+            <input type="file" accept="image/*" id="proof-input" style="display:none;">
+          </label>
+        `}
+      </div>
+
+      <div class="wa-note">
+         ${proof
+          ? 'Tekan tombol di bawah untuk mengirim foto bukti dan rincian pesanan ke WhatsApp admin. Akan muncul menu bagikan — pilih WhatsApp.'
+          : 'Setelah transfer, unggah foto bukti di atas lalu tekan tombol di bawah supaya foto dan rincian pesanan sampai ke admin.'}
+      </div>
+
+      <button class="btn-primary" id="btn-send-wa">
+        ${proof ? 'Kirim Bukti & Pesanan via WhatsApp' : 'Lanjutkan ke WhatsApp'}
+      </button>
+    </div>
+  `;
+}
+
+async function sendToWhatsApp(){
+  const text = buildWaMessage();
+  const proof = state.paymentProof;
+
+  if(proof && navigator.share && navigator.canShare && navigator.canShare({ files:[proof.file] })){
+    try{
+      await navigator.share({ files:[proof.file], text, title:'Bukti Pembayaran' });
+      return;
+    }catch(err){
+      if(err && err.name === 'AbortError') return; // dibatalkan pengguna, jangan lanjut fallback
+      console.warn('Share gagal, fallback ke tautan teks:', err);
+    }
+  }
+
+  window.open(waLink(text), '_blank', 'noopener');
+  if(proof){
+    showToast('Foto belum otomatis terkirim — unduh & lampirkan manual di WhatsApp');
+  }
+}
+
+function bindPaymentEvents(){
+  document.getElementById('back-checkout').onclick = ()=>{ state.view='checkout'; render(); };
+
+  const proofInput = document.getElementById('proof-input');
+  if(proofInput){
+    proofInput.onchange = (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      clearPaymentProof();
+      state.paymentProof = { file, previewUrl: URL.createObjectURL(file) };
+      render();
+    };
+  }
+  const proofRemove = document.getElementById('proof-remove');
+  if(proofRemove){
+    proofRemove.onclick = ()=>{ clearPaymentProof(); render(); };
+  }
+  document.getElementById('btn-send-wa').onclick = sendToWhatsApp;
+}
+
+/* ============================= PRODUCT DETAIL (slider) ============================= */
+function renderProductDetail(){
+  const { product, slide } = state.productDetail;
+  const images = product.images || [];
+  const hasImages = images.length > 0;
+  return `
+    <div class="pd-slider">
+      <button class="pd-close" id="pd-close">×</button>
+      ${hasImages ? `
+        <img class="pd-slide" src="${images[slide]}" alt="${product.name}">
+        ${images.length>1 ? `
+          <button class="pd-nav pd-nav--prev" id="pd-prev">‹</button>
+          <button class="pd-nav pd-nav--next" id="pd-next">›</button>
+          <div class="pd-dots">${images.map((_,i)=>`<div class="pd-dot ${i===slide?'active':''}"></div>`).join('')}</div>
+        ` : ''}
+      ` : `
+        <div class="pd-slide-empty">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5.5-5.5L3 20"/></svg>
+          Belum ada foto produk
+        </div>
+      `}
+    </div>
+    <div class="pd-body">
+      <h2 class="pd-title">${product.name}</h2>
+      <div class="pd-price">${rupiah(product.price)}</div>
+      <div class="pd-desc">${product.desc || 'Tidak ada keterangan tambahan.'}</div>
+      <button class="btn-primary" id="pd-buy">Beli Sekarang</button>
+    </div>
+  `;
+}
+
+function bindProductDetailEvents(){
+  document.getElementById('pd-close').onclick = closeProductDetail;
+  const prev = document.getElementById('pd-prev');
+  const next = document.getElementById('pd-next');
+  if(prev) prev.onclick = pdPrev;
+  if(next) next.onclick = pdNext;
+  document.getElementById('pd-buy').onclick = ()=>{
+    const product = state.productDetail.product;
+    closeProductDetail();
+    selectProduct(product);
+  };
+}
+
+/* ============================= ADMIN ============================= */
+const ADMIN_PASSWORD = 'ipungcuy123';
+
+function openAdmin(){
+  state.admin.open = true;
+  state.admin.pwInput = '';
+  if(state.admin.authed){
+    state.admin.editConfig = JSON.parse(JSON.stringify(state.config));
+    state.admin.editDiamonds = JSON.parse(JSON.stringify(state.diamonds));
+    state.admin.editProducts = JSON.parse(JSON.stringify(state.products));
+  }
+  render();
+}
+function closeAdmin(){
+  state.admin.open = false;
+  render();
+}
+
+function renderModal(){
+  const root = document.getElementById('modal-root');
+  if(!state.admin.open && !state.productDetail && !state.toast){ root.innerHTML=''; return; }
+
+  let modalHtml = '';
+  if(state.admin.open){
+    modalHtml += `
+      <div class="modal-backdrop" id="admin-backdrop">
+        <div class="modal" id="admin-modal">
+          ${state.admin.authed ? renderAdminPanel() : renderAdminLogin()}
+        </div>
+      </div>
+    `;
+  }
+  if(state.productDetail){
+    modalHtml += `
+      <div class="modal-backdrop" id="pd-backdrop">
+        <div class="modal pd-modal" id="pd-modal">
+          ${renderProductDetail()}
+        </div>
+      </div>
+    `;
+  }
+  const toastHtml = state.toast ? `<div class="toast">${state.toast}</div>` : '';
+  root.innerHTML = modalHtml + toastHtml;
+
+  if(state.admin.open){
+    document.getElementById('admin-backdrop').addEventListener('click', (e)=>{
+      if(e.target.id==='admin-backdrop') closeAdmin();
+    });
+    if(!state.admin.authed) bindAdminLoginEvents();
+    else bindAdminPanelEvents();
+  }
+  if(state.productDetail){
+    document.getElementById('pd-backdrop').addEventListener('click', (e)=>{
+      if(e.target.id==='pd-backdrop') closeProductDetail();
+    });
+    bindProductDetailEvents();
+  }
+}
+
+function renderAdminLogin(){
+  return `
+    <div class="modal__head">
+      <h2 style="font-size:19px;">Masuk Admin</h2>
+      <button class="modal__close" id="admin-close">×</button>
+    </div>
+    <div class="field">
+      <label>Kata sandi admin</label>
+      <input type="password" id="admin-pw" placeholder="Masukkan kata sandi">
+      <div id="admin-pw-error" class="error-text" style="display:none;">Kata sandi salah, coba lagi.</div>
+    </div>
+    <button class="btn-primary" id="admin-login-btn">Masuk</button>
+  `;
+}
+function bindAdminLoginEvents(){
+  document.getElementById('admin-close').onclick = closeAdmin;
+  const pw = document.getElementById('admin-pw');
+  const doLogin = ()=>{
+    if(pw.value === ADMIN_PASSWORD){
+      state.admin.authed = true;
+      state.admin.editConfig = JSON.parse(JSON.stringify(state.config));
+      state.admin.editDiamonds = JSON.parse(JSON.stringify(state.diamonds));
+      state.admin.editProducts = JSON.parse(JSON.stringify(state.products));
+      render();
+    }else{
+      document.getElementById('admin-pw-error').style.display='block';
+    }
+  };
+  document.getElementById('admin-login-btn').onclick = doLogin;
+  pw.onkeydown = (e)=>{ if(e.key==='Enter') doLogin(); };
+  pw.focus();
+}
+
+function renderAdminPanel(){
+  const t = state.admin.tab;
+  return `
+    <div class="modal__head">
+      <h2 style="font-size:19px;">Panel Admin</h2>
+      <button class="modal__close" id="admin-close">×</button>
+    </div>
+    ${!firebaseConfigured() ? `
+      <div class="wa-note" style="border-color:rgba(255,201,77,0.3);background:rgba(255,201,77,0.08);color:var(--text-dim);">
+        ⚠️ Database belum dihubungkan. Perubahan tetap bisa dicoba dan langsung terlihat di katalog, tapi akan hilang saat halaman dimuat ulang. Buka bagian atas kode (variabel <span class="mono">FIREBASE_DB_URL</span>) dan tempel URL Firebase Realtime Database kamu supaya semua perubahan tersimpan permanen.
+      </div>
+    ` : ''}
+    <div class="admin-tabs">
+      <button class="admin-tab ${t==='store'?'active':''}" data-atab="store">Pengaturan Toko</button>
+      <button class="admin-tab ${t==='diamond'?'active':''}" data-atab="diamond">Paket Diamond</button>
+      <button class="admin-tab ${t==='product'?'active':''}" data-atab="product">Produk Lainnya</button>
+    </div>
+    ${t==='store' ? renderAdminStore() : ''}
+    ${t==='diamond' ? renderAdminDiamonds() : ''}
+    ${t==='product' ? renderAdminProducts() : ''}
+  `;
+}
+
+function renderAdminStore(){
+  const c = state.admin.editConfig;
+  return `
+    <div class="field">
+      <label>Nama toko</label>
+      <input type="text" id="ac-name" value="${c.storeName}">
+    </div>
+    <div class="field">
+      <label>Logo toko</label>
+      <input type="file" id="ac-logo" accept="image/*">
+      ${c.logoImage ? `<img class="qris-upload-preview" style="border-radius:10px;" src="${c.logoImage}">` : `<div class="field__hint">Belum ada logo diunggah.</div>`}
+      <div class="field__hint">Tampil di pojok kiri atas website, sebaiknya gambar persegi.</div>
+    </div>
+    <div class="field">
+      <label>Nomor WhatsApp CS (format 62xxxxxxxxxx)</label>
+      <input type="text" id="ac-wa" value="${c.whatsapp}">
+      <div class="field__hint">Nomor ini dipakai untuk tombol chat CS dan konfirmasi pembayaran.</div>
+    </div>
+    <div class="field">
+      <label>Gambar QRIS</label>
+      <input type="file" id="ac-qris" accept="image/*">
+      ${c.qrisImage ? `<img class="qris-upload-preview" src="${c.qrisImage}">` : `<div class="field__hint">Belum ada gambar QRIS diunggah.</div>`}
+    </div>
+    <div class="save-bar">
+      <button class="btn-primary" id="ac-save">Simpan Pengaturan</button>
+    </div>
+  `;
+}
+
+function renderAdminDiamonds(){
+  const list = state.admin.editDiamonds;
+  return `
+    <div class="field__hint" style="margin-bottom:12px;">10 slot paket diamond dapat diubah nama, bonus, dan harganya.</div>
+    ${list.map((d,i)=>`
+      <div class="admin-grid-item">
+        <div class="field"><label>Nominal</label><input type="text" data-di="${i}" data-key="amount" value="${d.amount}"></div>
+        <div class="field"><label>Label bonus (opsional)</label><input type="text" data-di="${i}" data-key="bonus" value="${d.bonus||''}"></div>
+        <div class="field" style="grid-column:1/-1;"><label>Harga (Rp)</label><input type="number" data-di="${i}" data-key="price" value="${d.price}"></div>
+      </div>
+    `).join('')}
+    <div class="save-bar">
+      <button class="btn-primary" id="ad-save">Simpan Paket Diamond</button>
+    </div>
+  `;
+}
+
+function renderAdminProducts(){
+  const list = state.admin.editProducts;
+  return `
+    <div class="field__hint" style="margin-bottom:12px;">Tambahkan produk sepuasnya untuk kategori "Produk Lainnya". Setiap produk bisa punya 1–10 foto yang tampil sebagai slide saat diklik pembeli.</div>
+    ${list.map((p,i)=> state.admin.editingProductIndex===i ? renderProductEditRow(p,i) : renderProductRow(p,i)).join('')}
+    ${list.length===0 ? `<div class="empty-state" style="margin-bottom:14px;">Belum ada produk.</div>` : ''}
+
+    <div class="admin-grid-item" style="margin-top:16px;">
+      <div class="field" style="grid-column:1/-1;"><label>Nama produk</label><input type="text" id="np-name" placeholder="Contoh: Mobile Legends 172 Diamond" value="${state.admin.newProduct?.name||''}"></div>
+      <div class="field"><label>Harga (Rp)</label><input type="number" id="np-price" placeholder="25000" value="${state.admin.newProduct?.price||''}"></div>
+      <div class="field" style="grid-column:1/-1;"><label>Deskripsi</label><input type="text" id="np-desc" placeholder="Top up untuk akun Mobile Legends" value="${state.admin.newProduct?.desc||''}"></div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Foto produk (maks 10)</label>
+        ${renderGalleryGrid(state.admin.newProduct?.images||[], 'new')}
+        <div class="gallery-hint">Foto pertama jadi sampul di katalog. Foto lain tampil sebagai slide di halaman detail.</div>
+      </div>
+    </div>
+    <button class="btn-secondary" id="np-add">+ Tambah Produk</button>
+
+    <div class="save-bar">
+      <button class="btn-primary" id="ap-save">Simpan Produk</button>
+    </div>
+  `;
+}
+
+function renderGalleryGrid(images, target){
+  const thumbs = images.map((img,gi)=>`
+    <div class="gallery-thumb">
+      <img src="${img}">
+      <button class="gallery-thumb__remove" ${target==='new' ? `data-remove-newimg="${gi}"` : `data-remove-img="${target}:${gi}"`}>×</button>
+    </div>
+  `).join('');
+  const addTile = images.length < 10 ? `
+    <label class="gallery-add">
+      +<input type="file" accept="image/*" multiple style="display:none;" ${target==='new' ? `id="np-images-input"` : `data-add-img="${target}"`}>
+    </label>
+  ` : '';
+  return `<div class="gallery-grid">${thumbs}${addTile}</div>`;
+}
+
+function renderProductRow(p,i){
+  const cover = p.images && p.images[0];
+  return `
+    <div class="product-row" style="align-items:center;flex-wrap:wrap;">
+      <div class="item-thumb">${cover ? `<img src="${cover}">` : `<div class="item-thumb-empty">Belum ada gambar</div>`}</div>
+      <div class="product-row__info" style="flex:1;min-width:140px;">
+        <b>${p.name}</b>
+        <span>${rupiah(p.price)} · ${(p.images||[]).length} foto</span>
+      </div>
+      <button class="icon-btn" data-edit-product="${i}">✏️</button>
+      <button class="icon-btn danger" data-remove-product="${i}">🗑</button>
+    </div>
+  `;
+}
+
+function renderProductEditRow(p,i){
+  return `
+    <div class="admin-grid-item" style="margin-bottom:10px;">
+      <div class="field" style="grid-column:1/-1;"><label>Nama produk</label><input type="text" data-pe="${i}" data-pkey="name" value="${p.name}"></div>
+      <div class="field"><label>Harga (Rp)</label><input type="number" data-pe="${i}" data-pkey="price" value="${p.price}"></div>
+      <div class="field"><label>Deskripsi</label><input type="text" data-pe="${i}" data-pkey="desc" value="${p.desc||''}"></div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Foto produk (maks 10)</label>
+        ${renderGalleryGrid(p.images||[], i)}
+      </div>
+      <button class="btn-secondary" style="grid-column:1/-1;" data-close-edit="${i}">Selesai Edit</button>
+    </div>
+  `;
+}
+
+function bindAdminPanelEvents(){
+  document.getElementById('admin-close').onclick = closeAdmin;
+  document.querySelectorAll('.admin-tab').forEach(b=>{
+    b.onclick = ()=>{ state.admin.tab = b.dataset.atab; render(); };
+  });
+
+  if(state.admin.tab==='store'){
+    document.getElementById('ac-logo').onchange = async (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      try{
+        const dataUrl = await fileToCompressedDataUrl(file, 300, 0.85);
+        state.admin.editConfig.logoImage = dataUrl;
+        render();
+      }catch(err){ showToast('Gagal memuat logo'); }
+    };
+    document.getElementById('ac-qris').onchange = (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{ state.admin.editConfig.qrisImage = reader.result; render(); };
+      reader.readAsDataURL(file);
+    };
+    document.getElementById('ac-save').onclick = async ()=>{
+      const name = document.getElementById('ac-name').value.trim() || 'ADAMZ STORE';
+      const wa = document.getElementById('ac-wa').value.trim().replace(/\D/g,'');
+      const newCfg = { ...state.admin.editConfig, storeName:name, whatsapp: wa || state.config.whatsapp };
+      try{
+        const res = await saveConfig(newCfg);
+        showToast(res.persisted ? 'Pengaturan toko tersimpan' : 'Diterapkan sementara — hubungkan FIREBASE_DB_URL dulu supaya tersimpan permanen');
+        render();
+      }catch(e){
+        console.error('Simpan pengaturan gagal:', e);
+        showToast('Gagal menyimpan: ' + (e && e.message ? e.message : 'error tidak diketahui'));
+      }
+    };
+  }
+
+  if(state.admin.tab==='diamond'){
+    document.querySelectorAll('[data-di]').forEach(inp=>{
+      inp.oninput = (e)=>{
+        const i = parseInt(e.target.dataset.di);
+        const key = e.target.dataset.key;
+        state.admin.editDiamonds[i][key] = key==='price' ? Number(e.target.value||0) : e.target.value;
+      };
+    });
+    document.getElementById('ad-save').onclick = async ()=>{
+      try{
+        const res = await saveDiamonds(state.admin.editDiamonds);
+        showToast(res.persisted ? 'Paket diamond tersimpan' : 'Diterapkan sementara — hubungkan FIREBASE_DB_URL dulu supaya tersimpan permanen');
+        render();
+      }catch(e){
+        console.error('Simpan diamond gagal:', e);
+        showToast('Gagal menyimpan: ' + (e && e.message ? e.message : 'error tidak diketahui'));
+      }
+    };
+  }
+
+  if(state.admin.tab==='product'){
+    document.querySelectorAll('[data-remove-product]').forEach(b=>{
+      b.onclick = ()=>{
+        const i = parseInt(b.dataset.removeProduct);
+        state.admin.editProducts.splice(i,1);
+        if(state.admin.editingProductIndex===i) state.admin.editingProductIndex = null;
+        render();
+      };
+    });
+    document.querySelectorAll('[data-edit-product]').forEach(b=>{
+      b.onclick = ()=>{
+        state.admin.editingProductIndex = parseInt(b.dataset.editProduct);
+        render();
+      };
+    });
+    document.querySelectorAll('[data-close-edit]').forEach(b=>{
+      b.onclick = ()=>{
+        state.admin.editingProductIndex = null;
+        render();
+      };
+    });
+    document.querySelectorAll('[data-pe]').forEach(inp=>{
+      inp.oninput = (e)=>{
+        const i = parseInt(e.target.dataset.pe);
+        const key = e.target.dataset.pkey;
+        state.admin.editProducts[i][key] = key==='price' ? Number(e.target.value||0) : e.target.value;
+      };
+    });
+    document.querySelectorAll('[data-remove-img]').forEach(b=>{
+      b.onclick = ()=>{
+        const [i, gi] = b.dataset.removeImg.split(':').map(Number);
+        state.admin.editProducts[i].images.splice(gi,1);
+        render();
+      };
+    });
+    document.querySelectorAll('[data-add-img]').forEach(inp=>{
+      inp.onchange = async (e)=>{
+        const i = parseInt(e.target.dataset.addImg);
+        const files = Array.from(e.target.files || []);
+        if(!files.length) return;
+        const prod = state.admin.editProducts[i];
+        if(!prod.images) prod.images = [];
+        const room = 10 - prod.images.length;
+        try{
+          for(const file of files.slice(0, room)){
+            const dataUrl = await fileToCompressedDataUrl(file);
+            prod.images.push(dataUrl);
+          }
+          if(files.length > room) showToast('Maksimal 10 foto per produk');
+          render();
+        }catch(err){ showToast('Gagal memuat gambar'); }
+      };
+    });
+
+    if(!state.admin.newProduct) state.admin.newProduct = { name:'', price:'', desc:'', images:[] };
+    const npName = document.getElementById('np-name');
+    const npPrice = document.getElementById('np-price');
+    const npDesc = document.getElementById('np-desc');
+    npName.oninput = e=>{ state.admin.newProduct.name = e.target.value; };
+    npPrice.oninput = e=>{ state.admin.newProduct.price = e.target.value; };
+    npDesc.oninput = e=>{ state.admin.newProduct.desc = e.target.value; };
+    document.querySelectorAll('[data-remove-newimg]').forEach(b=>{
+      b.onclick = ()=>{
+        const gi = parseInt(b.dataset.removeNewimg);
+        state.admin.newProduct.images.splice(gi,1);
+        render();
+      };
+    });
+    const npImagesInput = document.getElementById('np-images-input');
+    if(npImagesInput){
+      npImagesInput.onchange = async (e)=>{
+        const files = Array.from(e.target.files || []);
+        if(!files.length) return;
+        if(!state.admin.newProduct.images) state.admin.newProduct.images = [];
+        const room = 10 - state.admin.newProduct.images.length;
+        try{
+          for(const file of files.slice(0, room)){
+            const dataUrl = await fileToCompressedDataUrl(file);
+            state.admin.newProduct.images.push(dataUrl);
+          }
+          if(files.length > room) showToast('Maksimal 10 foto per produk');
+          render();
+        }catch(err){ showToast('Gagal memuat gambar'); }
+      };
+    }
+    document.getElementById('np-add').onclick = ()=>{
+      const name = (state.admin.newProduct.name||'').trim();
+      const price = Number(state.admin.newProduct.price||0);
+      const desc = (state.admin.newProduct.desc||'').trim();
+      const images = state.admin.newProduct.images || [];
+      if(!name || !price){ showToast('Isi nama & harga produk dulu'); return; }
+      state.admin.editProducts.push({ id:'p'+Date.now(), name, price, desc, images });
+      state.admin.newProduct = { name:'', price:'', desc:'', images:[] };
+      render();
+    };
+    document.getElementById('ap-save').onclick = async ()=>{
+      try{
+        const res = await saveProducts(state.admin.editProducts);
+        showToast(res.persisted ? 'Produk tersimpan' : 'Diterapkan sementara — hubungkan FIREBASE_DB_URL dulu supaya tersimpan permanen');
+        render();
+      }catch(e){
+        console.error('Simpan produk gagal:', e);
+        showToast('Gagal menyimpan: ' + (e && e.message ? e.message : 'error tidak diketahui'));
+      }
+    };
+  }
+}
+
+/* ============================= INIT ============================= */
+loadData();
+</script>
+</body>
+</html>
