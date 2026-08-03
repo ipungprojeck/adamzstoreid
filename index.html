@@ -232,6 +232,25 @@
     font-size:12.5px; color:var(--text-dim); line-height:1.5;
   }
 
+  .proof-box{
+    border:1px dashed var(--border-strong); border-radius:12px; padding:14px; margin-bottom:16px;
+  }
+  .proof-box__label{ font-size:12.5px; font-weight:600; color:var(--text-dim); margin-bottom:8px; display:block; }
+  .proof-empty{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    border-radius:10px; padding:16px; color:var(--text-faint); font-size:13px; cursor:pointer;
+    background:var(--bg);
+  }
+  .proof-empty:hover{ color:var(--text); }
+  .proof-preview{ display:flex; align-items:center; gap:12px; }
+  .proof-preview img{ width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--border); }
+  .proof-preview__info{ flex:1; font-size:12.5px; color:var(--text-dim); }
+  .proof-preview__actions{ display:flex; gap:8px; margin-top:6px; }
+  .proof-preview__actions a, .proof-preview__actions button{
+    font-size:11.5px; color:var(--cyan); background:none; border:none; padding:0; text-decoration:underline;
+  }
+  .proof-preview__actions .danger-link{ color:var(--danger); }
+
   /* ---------- Footer ---------- */
   .footer{
     margin-top:60px; border-top:1px solid var(--border); padding-top:22px;
@@ -428,27 +447,57 @@ let state = {
   orderCode: '',
   admin: { open:false, authed:false, pwInput:'', tab:'store', editConfig:null, editDiamonds:null, editProducts:null, newProduct:null, editingProductIndex:null },
   productDetail: null,     // { product, slide }
+  paymentProof: null,      // { file, previewUrl }
   toast:''
 };
 
 function render(){ renderApp(); renderModal(); }
 
-/* ============================= STORAGE ============================= */
-const STORAGE_AVAILABLE = (typeof window.storage !== 'undefined' && window.storage !== null);
+/* ============================= STORAGE (Firebase Realtime Database) =============================
+   Cara aktifkan penyimpanan permanen:
+   1. Buat project gratis di https://console.firebase.google.com
+   2. Buka menu Build > Realtime Database > Create Database (pilih lokasi terdekat)
+   3. Pada tab "Rules", pakai:  { "rules": { ".read": true, ".write": true } }  lalu Publish
+      (catatan keamanan: siapa pun yang tahu URL database ini bisa membaca & mengubah data,
+       cukup aman untuk toko kecil tapi jangan simpan data sensitif di sini)
+   4. Salin URL yang muncul di atas tab Data, bentuknya seperti:
+      https://nama-project-default-rtdb.asia-southeast1.firebasedatabase.app
+   5. Tempel URL itu ke FIREBASE_DB_URL di bawah ini (ganti teks placeholder-nya)
+================================================================================================= */
+const FIREBASE_DB_URL = 'https://adamz-store-default-rtdb.asia-southeast1.firebasedatabase.app/config';
+
+function firebaseConfigured(){
+  return FIREBASE_DB_URL && !FIREBASE_DB_URL.includes('PASTE_URL_FIREBASE');
+}
+
+async function fbGet(path){
+  const res = await fetch(`${FIREBASE_DB_URL.replace(/\/$/,'')}/${path}.json`);
+  if(!res.ok) throw new Error('Gagal memuat data (' + res.status + ')');
+  return res.json();
+}
+async function fbPut(path, value){
+  const res = await fetch(`${FIREBASE_DB_URL.replace(/\/$/,'')}/${path}.json`, {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(value)
+  });
+  if(!res.ok) throw new Error('Gagal menyimpan (' + res.status + ')');
+  return res.json();
+}
 
 async function loadData(){
-  if(STORAGE_AVAILABLE){
+  if(firebaseConfigured()){
     try{
-      const cfg = await window.storage.get('ff-topup:config', true);
-      if(cfg && cfg.value) state.config = { ...DEFAULT_CONFIG, ...JSON.parse(cfg.value) };
+      const cfg = await fbGet('config');
+      if(cfg) state.config = { ...DEFAULT_CONFIG, ...cfg };
     }catch(e){ console.warn('Load config gagal:', e); }
     try{
-      const dia = await window.storage.get('ff-topup:diamonds', true);
-      if(dia && dia.value) state.diamonds = JSON.parse(dia.value);
+      const dia = await fbGet('diamonds');
+      if(dia) state.diamonds = dia;
     }catch(e){ console.warn('Load diamonds gagal:', e); }
     try{
-      const prod = await window.storage.get('ff-topup:products', true);
-      if(prod && prod.value) state.products = JSON.parse(prod.value);
+      const prod = await fbGet('products');
+      if(prod) state.products = prod;
     }catch(e){ console.warn('Load products gagal:', e); }
   }
   state.loading = false;
@@ -456,20 +505,20 @@ async function loadData(){
 }
 async function saveConfig(cfg){
   state.config = cfg;
-  if(!STORAGE_AVAILABLE) return { persisted:false };
-  await window.storage.set('ff-topup:config', JSON.stringify(cfg), true);
+  if(!firebaseConfigured()) return { persisted:false };
+  await fbPut('config', cfg);
   return { persisted:true };
 }
 async function saveDiamonds(list){
   state.diamonds = list;
-  if(!STORAGE_AVAILABLE) return { persisted:false };
-  await window.storage.set('ff-topup:diamonds', JSON.stringify(list), true);
+  if(!firebaseConfigured()) return { persisted:false };
+  await fbPut('diamonds', list);
   return { persisted:true };
 }
 async function saveProducts(list){
   state.products = list;
-  if(!STORAGE_AVAILABLE) return { persisted:false };
-  await window.storage.set('ff-topup:products', JSON.stringify(list), true);
+  if(!firebaseConfigured()) return { persisted:false };
+  await fbPut('products', list);
   return { persisted:true };
 }
 
@@ -478,7 +527,7 @@ function rupiah(n){ return 'Rp' + Number(n||0).toLocaleString('id-ID'); }
 function genOrderCode(){
   const t = Date.now().toString().slice(-6);
   const r = Math.floor(100+Math.random()*900);
-  return 'IG-' + t + '-' + r;
+  return 'ADMZ-' + t + '-' + r;
 }
 function showToast(msg){
   state.toast = msg;
@@ -517,15 +566,23 @@ function fileToCompressedDataUrl(file, maxWidth=520, quality=0.75){
 }
 
 /* ============================= ACTIONS ============================= */
-function goCatalog(){ state.view='catalog'; state.selectedItem=null; render(); }
+function clearPaymentProof(){
+  if(state.paymentProof && state.paymentProof.previewUrl){
+    URL.revokeObjectURL(state.paymentProof.previewUrl);
+  }
+  state.paymentProof = null;
+}
+function goCatalog(){ state.view='catalog'; state.selectedItem=null; clearPaymentProof(); render(); }
 function selectDiamond(item){
   state.selectedItem = { kind:'diamond', ...item };
   state.form = { gameId:'', nickname:'', qty:1 };
+  clearPaymentProof();
   state.view='checkout'; render();
 }
 function selectProduct(item){
   state.selectedItem = { kind:'product', ...item };
   state.form = { gameId:'', nickname:'', qty:1 };
+  clearPaymentProof();
   state.view='checkout'; render();
 }
 function openProductDetail(product){
@@ -746,6 +803,8 @@ function renderPayment(){
   const qrisImg = state.config.qrisImage
     ? `<img src="${state.config.qrisImage}" alt="QRIS">`
     : `<div class="qris-placeholder">Belum ada QRIS terpasang.<br>Admin dapat mengunggahnya di panel admin.</div>`;
+  const proof = state.paymentProof;
+
   return `
     <div class="panel">
       <button class="panel__back" id="back-checkout">← Ubah pesanan</button>
@@ -763,19 +822,78 @@ function renderPayment(){
         <div class="qris-caption">Scan dengan aplikasi e-wallet atau m-banking mana pun</div>
       </div>
 
-      <div class="wa-note">
-        ℹ️ Setelah transfer, tekan tombol di bawah untuk membuka WhatsApp dengan rincian pesanan yang sudah terisi otomatis. Admin akan memproses pesananmu setelah bukti bayar diterima.
+      <div class="proof-box">
+        <label class="proof-box__label">Bukti Transfer (opsional, tapi disarankan)</label>
+        ${proof ? `
+          <div class="proof-preview">
+            <img src="${proof.previewUrl}" alt="Bukti transfer">
+            <div class="proof-preview__info">
+              ${proof.file.name}
+              <div class="proof-preview__actions">
+                <a href="${proof.previewUrl}" download="bukti-${state.orderCode}.jpg">Unduh foto</a>
+                <button class="danger-link" id="proof-remove">Hapus</button>
+              </div>
+            </div>
+          </div>
+        ` : `
+          <label class="proof-empty">
+            📎 Ketuk untuk unggah foto bukti transfer
+            <input type="file" accept="image/*" id="proof-input" style="display:none;">
+          </label>
+        `}
       </div>
 
-      <a class="btn-primary" style="display:block;text-align:center;text-decoration:none;box-sizing:border-box;" href="${waLink(buildWaMessage())}" target="_blank" rel="noopener">
-        Saya Sudah Bayar — Lanjutkan ke WhatsApp
-      </a>
+      <div class="wa-note">
+         ${proof
+          ? 'Tekan tombol di bawah untuk mengirim foto bukti dan rincian pesanan ke WhatsApp admin. Di HP, akan muncul menu bagikan — pilih WhatsApp. Kalau menu itu tidak muncul (biasanya di laptop), WhatsApp akan terbuka dengan teks pesanan saja — lampirkan foto secara manual di sana, atau pakai tombol "Unduh foto" di atas dulu.'
+          : 'Setelah transfer, unggah foto bukti di atas lalu tekan tombol di bawah supaya foto dan rincian pesanan sama-sama sampai ke admin. Boleh juga dilewati dan kirim teks pesanan saja.'}
+      </div>
+
+      <button class="btn-primary" id="btn-send-wa">
+        ${proof ? 'Kirim Bukti & Pesanan via WhatsApp' : 'Saya Sudah Bayar — Lanjutkan ke WhatsApp'}
+      </button>
     </div>
   `;
 }
 
+async function sendToWhatsApp(){
+  const text = buildWaMessage();
+  const proof = state.paymentProof;
+
+  if(proof && navigator.share && navigator.canShare && navigator.canShare({ files:[proof.file] })){
+    try{
+      await navigator.share({ files:[proof.file], text, title:'Bukti Pembayaran' });
+      return;
+    }catch(err){
+      if(err && err.name === 'AbortError') return; // dibatalkan pengguna, jangan lanjut fallback
+      console.warn('Share gagal, fallback ke tautan teks:', err);
+    }
+  }
+
+  window.open(waLink(text), '_blank', 'noopener');
+  if(proof){
+    showToast('Foto belum otomatis terkirim — unduh & lampirkan manual di WhatsApp');
+  }
+}
+
 function bindPaymentEvents(){
   document.getElementById('back-checkout').onclick = ()=>{ state.view='checkout'; render(); };
+
+  const proofInput = document.getElementById('proof-input');
+  if(proofInput){
+    proofInput.onchange = (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      clearPaymentProof();
+      state.paymentProof = { file, previewUrl: URL.createObjectURL(file) };
+      render();
+    };
+  }
+  const proofRemove = document.getElementById('proof-remove');
+  if(proofRemove){
+    proofRemove.onclick = ()=>{ clearPaymentProof(); render(); };
+  }
+  document.getElementById('btn-send-wa').onclick = sendToWhatsApp;
 }
 
 /* ============================= PRODUCT DETAIL (slider) ============================= */
@@ -921,9 +1039,9 @@ function renderAdminPanel(){
       <h2 style="font-size:19px;">Panel Admin</h2>
       <button class="modal__close" id="admin-close">×</button>
     </div>
-    ${!STORAGE_AVAILABLE ? `
+    ${!firebaseConfigured() ? `
       <div class="wa-note" style="border-color:rgba(255,201,77,0.3);background:rgba(255,201,77,0.08);color:var(--text-dim);">
-        ⚠️ Penyimpanan permanen tidak terdeteksi di pratinjau ini. Perubahan tetap bisa dicoba dan langsung terlihat di katalog, tapi akan hilang saat halaman dimuat ulang. Ini biasanya terjadi kalau file dibuka langsung dari komputer, bukan lewat pratinjau artifact Claude.
+        ⚠️ Database belum dihubungkan. Perubahan tetap bisa dicoba dan langsung terlihat di katalog, tapi akan hilang saat halaman dimuat ulang. Buka bagian atas kode (variabel <span class="mono">FIREBASE_DB_URL</span>) dan tempel URL Firebase Realtime Database kamu supaya semua perubahan tersimpan permanen.
       </div>
     ` : ''}
     <div class="admin-tabs">
@@ -1082,7 +1200,7 @@ function bindAdminPanelEvents(){
       const newCfg = { ...state.admin.editConfig, storeName:name, whatsapp: wa || state.config.whatsapp };
       try{
         const res = await saveConfig(newCfg);
-        showToast(res.persisted ? 'Pengaturan toko tersimpan' : 'Diterapkan sementara — penyimpanan permanen tidak tersedia di pratinjau ini');
+        showToast(res.persisted ? 'Pengaturan toko tersimpan' : 'Diterapkan sementara — hubungkan FIREBASE_DB_URL dulu supaya tersimpan permanen');
         render();
       }catch(e){
         console.error('Simpan pengaturan gagal:', e);
@@ -1102,7 +1220,7 @@ function bindAdminPanelEvents(){
     document.getElementById('ad-save').onclick = async ()=>{
       try{
         const res = await saveDiamonds(state.admin.editDiamonds);
-        showToast(res.persisted ? 'Paket diamond tersimpan' : 'Diterapkan sementara — penyimpanan permanen tidak tersedia di pratinjau ini');
+        showToast(res.persisted ? 'Paket diamond tersimpan' : 'Diterapkan sementara — hubungkan FIREBASE_DB_URL dulu supaya tersimpan permanen');
         render();
       }catch(e){
         console.error('Simpan diamond gagal:', e);
@@ -1209,7 +1327,7 @@ function bindAdminPanelEvents(){
     document.getElementById('ap-save').onclick = async ()=>{
       try{
         const res = await saveProducts(state.admin.editProducts);
-        showToast(res.persisted ? 'Produk tersimpan' : 'Diterapkan sementara — penyimpanan permanen tidak tersedia di pratinjau ini');
+        showToast(res.persisted ? 'Produk tersimpan' : 'Diterapkan sementara — hubungkan FIREBASE_DB_URL dulu supaya tersimpan permanen');
         render();
       }catch(e){
         console.error('Simpan produk gagal:', e);
